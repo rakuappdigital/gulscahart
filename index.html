@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Acil Durum Kutusu</title>
+<style>
+  :root {
+    --bg-top: #1a0f14;
+    --bg-bottom: #2b0f1a;
+    --red: #ff3b57;
+    --red-dark: #c81f3d;
+    --blue: #4f7dff;
+    --blue-dark: #2c4fce;
+    --green: #2fd88f;
+    --green-dark: #189b64;
+    --card: rgba(255,255,255,0.08);
+    --gold: #ffd23f;
+    --gold-dark: #d69a00;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at 50% 15%, var(--bg-bottom), var(--bg-top));
+    color: #fff;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  body.shake { animation: shake 0.5s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translate(0,0); }
+    20% { transform: translate(-8px, 4px); }
+    40% { transform: translate(7px, -5px); }
+    60% { transform: translate(-6px, -3px); }
+    80% { transform: translate(6px, 5px); }
+  }
+
+  /* ambient background blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.28;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .blob.b1 { width: 320px; height: 320px; background: var(--red); top: -80px; left: -80px; }
+  .blob.b2 { width: 280px; height: 280px; background: var(--blue); bottom: -60px; right: -60px; }
+  .blob.b3 { width: 260px; height: 260px; background: var(--green); bottom: 10%; left: -60px; }
+  .blob.b4 { width: 260px; height: 260px; background: var(--gold); top: 20%; right: -60px; }
+
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: var(--red);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    mix-blend-mode: screen;
+  }
+  .flash.blue { background: var(--blue); }
+  .flash.green { background: var(--green); }
+  .flash.gold { background: var(--gold); }
+  .flash.pop { animation: flashpop 0.4s ease-out; }
+  @keyframes flashpop {
+    0% { opacity: 0.5; }
+    100% { opacity: 0; }
+  }
+
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 26px 20px 10px;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .title {
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  .subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    max-width: 300px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  .stage {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+  }
+
+  .orb-btn {
+    position: fixed;
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-align: center;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.4), inset 0 2px 10px rgba(255,255,255,0.25);
+    transition: transform 0.12s ease;
+    will-change: left, top;
+  }
+  .orb-btn:active { transform: scale(0.9); }
+  .orb-btn.kick { animation: kick 0.4s ease; }
+  @keyframes kick {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+
+  .orb-btn .icon {
+    font-size: 36px;
+    line-height: 1;
+  }
+  .orb-btn .label {
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  #okunasiBtn {
+    background: radial-gradient(circle at 32% 28%, #ff7a8c, var(--red) 55%, var(--red-dark));
+    animation: breathe-red 2.4s ease-in-out infinite;
+  }
+  #dinleneseBtn {
+    background: radial-gradient(circle at 32% 28%, #8aa8ff, var(--blue) 55%, var(--blue-dark));
+    animation: breathe-blue 2.4s ease-in-out infinite;
+    animation-delay: 0.4s;
+  }
+  #bakilasiBtn {
+    background: radial-gradient(circle at 32% 28%, #7cf0bd, var(--green) 55%, var(--green-dark));
+    animation: breathe-green 2.4s ease-in-out infinite;
+    animation-delay: 0.8s;
+  }
+  #bestBtn {
+    background: radial-gradient(circle at 32% 28%, #ffe58a, var(--gold) 55%, var(--gold-dark));
+    animation: breathe-gold 2.4s ease-in-out infinite;
+    animation-delay: 1.2s;
+    color: #402800;
+  }
+
+  @keyframes breathe-red {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,87,0.5), 0 16px 40px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(255,59,87,0), 0 16px 40px rgba(0,0,0,0.4); }
+  }
+  @keyframes breathe-blue {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(79,125,255,0.5), 0 16px 40px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(79,125,255,0), 0 16px 40px rgba(0,0,0,0.4); }
+  }
+  @keyframes breathe-green {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(47,216,143,0.5), 0 16px 40px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(47,216,143,0), 0 16px 40px rgba(0,0,0,0.4); }
+  }
+  @keyframes breathe-gold {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,210,63,0.55), 0 16px 40px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(255,210,63,0), 0 16px 40px rgba(0,0,0,0.4); }
+  }
+
+  #okunasiBtn.excited { animation: breathe-red 0.7s ease-in-out infinite; }
+
+  .caught-badge {
+    position: absolute;
+    top: -10px;
+    right: -6px;
+    background: var(--gold);
+    color: #402800;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 999px;
+    transform: rotate(8deg) scale(0.7);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(.3,1.8,.4,1);
+    pointer-events: none;
+  }
+  .caught-badge.show { opacity: 1; transform: rotate(8deg) scale(1); }
+
+  .particle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 4;
+    will-change: transform, opacity;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,5,8,0.88);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    z-index: 10;
+  }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 28px;
+    padding: 36px 28px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    transform: scale(0.7) translateY(20px) rotate(-4deg);
+    transition: transform 0.4s cubic-bezier(.2,1.6,.35,1);
+  }
+  .overlay.show .card { transform: scale(1) translateY(0) rotate(0deg); }
+
+  .card .emoji {
+    font-size: 64px;
+    margin-bottom: 16px;
+    display: block;
+    animation: pop 0.5s cubic-bezier(.3,1.8,.4,1);
+  }
+  @keyframes pop {
+    0% { transform: scale(0) rotate(-30deg); }
+    60% { transform: scale(1.25) rotate(8deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .card .message {
+    font-size: 17px;
+    line-height: 1.55;
+    font-weight: 700;
+    margin-bottom: 26px;
+    white-space: pre-line;
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+
+  .card img.reveal-img {
+    width: 100%;
+    max-height: 380px;
+    object-fit: cover;
+    border-radius: 18px;
+    margin-bottom: 22px;
+    display: block;
+    animation: pop 0.5s cubic-bezier(.3,1.8,.4,1);
+  }
+
+  .card .close {
+    border: none;
+    color: white;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 12px 28px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .close.red { background: var(--red); }
+  .close.blue { background: var(--blue-dark); }
+  .close.green { background: var(--green-dark); }
+  .close.gold { background: var(--gold-dark); color: #402800; }
+
+  .footer {
+    position: fixed;
+    bottom: 14px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .counter {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+  }
+  .secret-hint {
+    margin-top: 3px;
+    font-size: 12px;
+    color: rgba(255,210,63,0.9);
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .secret-hint.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <div class="flash" id="flash"></div>
+
+  <div class="header">
+    <div class="title">ACİL SIKILDIM UYGULAMASI</div>
+    <div class="subtitle">Buraya en sıkıldığın anlarda ya da ansızın gelebilirsin Gülşah! 👇</div>
+  </div>
+
+  <div class="stage" id="stage">
+    <button class="orb-btn" id="okunasiBtn">
+      <span class="icon">📖</span>
+      <span class="label">OKUNASI</span>
+      <span class="caught-badge" id="caughtBadge">YAKALANDI!</span>
+    </button>
+
+    <button class="orb-btn" id="dinleneseBtn">
+      <span class="icon">🎧</span>
+      <span class="label">DİNLENESİ</span>
+    </button>
+
+    <button class="orb-btn" id="bakilasiBtn">
+      <span class="icon">👀</span>
+      <span class="label">BAKILASI</span>
+    </button>
+
+    <button class="orb-btn" id="bestBtn">
+      <span class="icon">🏆</span>
+      <span class="label">BEST</span>
+    </button>
+  </div>
+
+  <div class="footer">
+    <div class="counter" id="counter"></div>
+    <div class="secret-hint" id="secretHint">🔒 OKUNASI'ya birkaç kere daha bas, bir sır açılsın</div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="card" id="card">
+      <span class="emoji" id="emoji">✨</span>
+      <div class="message" id="message">Mesaj buraya gelecek</div>
+      <button class="close red" id="closeBtn">tamam :)</button>
+    </div>
+  </div>
+
+<script>
+  // ====== PLACEHOLDER İÇERİK — sonra doldurulacak ======
+  const messages = [
+    { emoji: "📖", text: "“Zamanların en iyisiydi, zamanların en kötüsüydü; hem akıl çağıydı, hem aptallık çağıydı; hem inanç devriydi, hem de kuşku; Aydınlık mevsimiydi, Karanlık mevsimiydi; umudun baharıydı, umutsuzluğun kışıydı; her şeyimiz vardı, hiçbir şeyimiz yoktu; hepimiz doğrudan cennete gidiyorduk, hepimiz doğrudan cehenneme gidiyorduk...”\n— İki Şehrin Hikayesi, Charles Dickens" },
+    { emoji: "📖", text: "“Albay Aureliano Buendía, yıllar sonra idam mangasının karşısına dikildiğinde, babasının onu buzu keşfetmeye götürdüğü o uzak öğleden sonrayı hatırlayacaktı. Macondo o zamanlar, tarihöncesi kuşların yumurtaları kadar ak ve kocaman, cilalı taşların yatağında akan duru bir nehrin kıyısında kurulmuş yirmi haneli bir köydü.”\n— Yüz Yıllık Yalnızlık, Gabriel García Márquez" },
+    { emoji: "📖", text: "“Bütün mutlu aileler birbirine benzer; her mutsuz ailenin ise kendine özgü bir mutsuzluğu vardır. Oblonsky'lerin evinde her şey birbirine girmişti. Kadın, kocasının evde eskiden mürebbiye olarak çalışan Fransız kızıyla ilişkisi olduğunu öğrenmiş ve onunla aynı çatı altında yaşayamayacağını kocasına bildirmişti.”\n— Anna Karenina, Lev Tolstoy" },
+    { emoji: "📖", text: "“Geçmişi kontrol eden, geleceği de kontrol eder; bugünü kontrol eden, geçmişi de kontrol eder. (...) Parti'nin söylediği en büyük yalan, kendi gözlerinizle gördüklerinize ve kulaklarınızla duyduklarınıza inanmamanızı emretmesiydi. Bu onların nihai ve en temel emriydi.”\n— 1984, George Orwell" },
+    { emoji: "📖", text: "“Servet sahibi bekar bir erkeğin mutlaka bir eşe ihtiyacı olduğu, herkesçe kabul edilen bir gerçektir. Böyle bir adam yeni bir yere taşındığında, çevredeki aileler onun duygularını ya da görüşlerini bilmeseler de, bu gerçeği o kadar benimsemişlerdir ki, onu kızlarından birinin meşru malı olarak görürler.”\n— Gurur ve Önyargı, Jane Austen" },
+    { emoji: "📖", text: "“Sayın beyefendi, yoksulluk ayıp değildir, bu bir gerçektir. Sefalet ise bir ayıptır. Yoksullukta insan doğuştan gelen soylu duygularını koruyabilir, oysa sefalette bunu yapabilen hiç çıkmamıştır. (...) Çünkü her insanın, gidebileceği en azından bir yeri olması gerekir. Öyle anlar gelir ki, insanın mutlaka bir yere gitmesi şart olur!”\n— Suç ve Ceza, Fyodor Dostoyevski" },
+    { emoji: "📖", text: "“İşte benim sırrım, çok basit: İnsan ancak yüreğiyle baktığı zaman doğruyu görebilir. Gerçeğin mayası gözle görülmez. Gülünü senin için bu kadar önemli kılan, ona harcadığın zamandır. İnsanlar bu gerçeği unuttular, ama sen unutmamalısın. Evcilleştirdiğin şeyden her zaman sen sorumlusun.”\n— Küçük Prens, Antoine de Saint-Exupéry" },
+    { emoji: "📖", text: "“Hayatın en büyük mutluluğu sevilmiş olduğumuza ikna olmaktır; kendimiz için sevilmiş, hatta kendimize rağmen sevilmiş olduğumuza. Gecenin karanlığında yıldızlar nasıl parlarsa, insanın içindeki umut da en derin umutsuzluk anlarında öyle parlar. Sevmek, bir başkasının ruhunda ışık olmaktır.”\n— Sefiller, Victor Hugo" }
+  ];
+  const secretMessage = { emoji: "🔓", text: "Sırrı çözdün: bunu senin için özel yaptım." };
+
+  const youtubeLinks = [
+    "https://www.youtube.com/watch?v=XxPPkc_M-YU",
+    "https://www.youtube.com/watch?v=SuqkqV0wRHs",
+    "https://www.youtube.com/watch?v=den_T_Wnleo",
+    "https://www.youtube.com/watch?v=_HPFLSmXBUk",
+    "https://www.youtube.com/watch?v=eNvUS-6PTbs",
+    "https://www.youtube.com/watch?v=qjKO1tJHEJc",
+    "https://www.youtube.com/watch?v=c18441Eh_WE",
+    "https://www.youtube.com/watch?v=oUdi2S74V4E",
+    "https://www.youtube.com/watch?v=YfGETWOypGA",
+    "https://www.youtube.com/watch?v=S4cSSmRC5RY",
+  ];
+
+  const imageLinks = [
+    "https://pbs.twimg.com/media/EX6dj43XsAApVp0.jpg",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRm9YIx03m8O04dhNzmnCqhWxpsNem3If1nhl9x2oDN-mhFiq5sT3kYIwk&s=10",
+    "https://www.justincanvas.com/wp-content/uploads/2020/03/Pablo-Picasso-Portrait-of-Ambroise-Vollard.jpg",
+    "https://i0.wp.com/bookmypainting.com/wp-content/uploads/2019/06/napoleon-crossing-the-alps-1.jpeg?resize=542%2C660&ssl=1",
+    "https://i.pinimg.com/736x/9a/d8/80/9ad880869fb58acc1eedd6bdda1317f5.jpg",
+    "https://images.unsplash.com/flagged/photo-1572392640988-ba48d1a74457?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmFtb3VzJTIwcGFpbnRpbmdzfGVufDB8fDB8fHww",
+    "https://www.neh.gov/sites/default/files/styles/large/public/2022-06/Summer2022_web-images_28b_Caravaggio.jpg?itok=2aSPpYsz",
+    "https://www.neh.gov/sites/default/files/styles/large/public/2022-06/Summer2022_web-images_31_Caravaggio.jpg?itok=PBI82spn",
+  ];
+
+  const bestLinks = [
+    "https://www.youtube.com/watch?v=JSWIHPdUBV4",
+    "https://www.youtube.com/watch?v=VdyE52uctoI",
+    "https://www.youtube.com/watch?v=AUuGkNow95Q",
+    "https://www.youtube.com/shorts/faWpbYxtoDI",
+  ];
+  // ======================================================
+
+  const confettiEmojis = ["🎉","✨","💖","🌟","😂","🔥","💫","🎈","😍","💥"];
+  const goldEmojis = ["🏆","🎊","👑","💛","🌟","✨"];
+  const musicEmojis = ["🎵","🎶","🎧","💙","✨"];
+  const eyeEmojis = ["👀","💚","✨","🌿","📸"];
+  const bestEmojis = ["🏆","⭐","🥇","✨","🎉"];
+
+  const okunasiBtn = document.getElementById('okunasiBtn');
+  const dinleneseBtn = document.getElementById('dinleneseBtn');
+  const bakilasiBtn = document.getElementById('bakilasiBtn');
+  const bestBtn = document.getElementById('bestBtn');
+  const overlay = document.getElementById('overlay');
+  const card = document.getElementById('card');
+  const messageEl = document.getElementById('message');
+  const emojiEl = document.getElementById('emoji');
+  const closeBtn = document.getElementById('closeBtn');
+  const counterEl = document.getElementById('counter');
+  const caughtBadge = document.getElementById('caughtBadge');
+  const secretHint = document.getElementById('secretHint');
+  const flash = document.getElementById('flash');
+
+  // ---- yardımcı: aynısını art arda göstermeyen "shuffle bag" ----
+  function makeBag(items) {
+    let bag = [];
+    let last = null;
+    function refill() {
+      bag = items.map((_, i) => i);
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
+      }
+      if (bag.length > 1 && bag[0] === last) {
+        [bag[0], bag[1]] = [bag[1], bag[0]];
+      }
+    }
+    return function next() {
+      if (bag.length === 0) refill();
+      const idx = bag.pop();
+      last = idx;
+      return items[idx];
+    };
+  }
+
+  const nextMessage = makeBag(messages);
+  const nextVideo = youtubeLinks.length ? makeBag(youtubeLinks) : null;
+  const nextImage = imageLinks.length ? makeBag(imageLinks) : null;
+  const nextBest = bestLinks.length ? makeBag(bestLinks) : null;
+
+  // ---- Serbest gezinen (floating) toplar ----
+  const TOP_SAFE = 130;
+  const BOTTOM_SAFE = 60;
+  const SIDE_SAFE = 8;
+
+  const ALL_BTNS = [okunasiBtn, dinleneseBtn, bakilasiBtn, bestBtn];
+
+  function randStart(i) {
+    const w = window.innerWidth, h = window.innerHeight;
+    const size = 128;
+    const col = w / ALL_BTNS.length;
+    const x = col * i + (col - size) / 2;
+    const y = TOP_SAFE + Math.random() * (h - TOP_SAFE - BOTTOM_SAFE - size);
+    return { x: Math.max(SIDE_SAFE, Math.min(x, w - size - SIDE_SAFE)), y };
+  }
+
+  const orbs = ALL_BTNS.map((el, i) => {
+    const start = randStart(i);
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.35 + Math.random() * 0.2;
+    return {
+      el,
+      x: start.x,
+      y: start.y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      boostUntil: 0,
+    };
+  });
+
+  function tickOrbs() {
+    const w = window.innerWidth, h = window.innerHeight;
+    const now = performance.now();
+
+    orbs.forEach((o) => {
+      const size = o.el.offsetWidth || 128;
+      const boosted = now < o.boostUntil;
+      const mult = boosted ? 2.2 : 1;
+
+      o.x += o.vx * mult;
+      o.y += o.vy * mult;
+
+      const minX = SIDE_SAFE, maxX = w - size - SIDE_SAFE;
+      const minY = TOP_SAFE, maxY = h - size - BOTTOM_SAFE;
+
+      if (o.x < minX) { o.x = minX; o.vx *= -1; }
+      if (o.x > maxX) { o.x = maxX; o.vx *= -1; }
+      if (o.y < minY) { o.y = minY; o.vy *= -1; }
+      if (o.y > maxY) { o.y = maxY; o.vy *= -1; }
+
+      o.el.style.left = o.x + 'px';
+      o.el.style.top = o.y + 'px';
+    });
+
+    requestAnimationFrame(tickOrbs);
+  }
+
+  // birbirlerinin üstüne binmesinler diye ayrı ayrı başlat
+  ALL_BTNS.forEach((el, i) => {
+    el.style.position = 'fixed';
+    el.style.left = orbs[i].x + 'px';
+    el.style.top = orbs[i].y + 'px';
+  });
+  requestAnimationFrame(tickOrbs);
+
+  function kick(el, orb) {
+    el.classList.remove('kick');
+    void el.offsetWidth;
+    el.classList.add('kick');
+    // tekmeleyince rastgele yeni yöne fırlasın
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.5 + Math.random() * 0.3;
+    orb.vx = Math.cos(angle) * speed;
+    orb.vy = Math.sin(angle) * speed;
+  }
+
+  function elCenter(el) {
+    const rect = el.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }
+
+  function flashScreen(color) {
+    flash.classList.remove('pop', 'blue', 'green', 'gold');
+    void flash.offsetWidth;
+    if (color) flash.classList.add(color);
+    flash.classList.add('pop');
+  }
+
+  function shakeScreen() {
+    document.body.classList.remove('shake');
+    void document.body.offsetWidth;
+    document.body.classList.add('shake');
+  }
+
+  function burstConfetti(x, y, count, pool, big) {
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'particle';
+      el.textContent = pool[Math.floor(Math.random() * pool.length)];
+
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.6;
+      const distance = 110 + Math.random() * (big ? 260 : 170);
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance - 50;
+      const rot = (Math.random() - 0.5) * 720;
+      const scale = 0.7 + Math.random() * (big ? 1.3 : 0.8);
+      const duration = 850 + Math.random() * 650;
+
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.fontSize = (big ? 28 : 20) + Math.random() * 18 + 'px';
+      el.style.opacity = '1';
+      el.style.transform = 'translate(-50%,-50%) scale(0) rotate(0deg)';
+      el.style.transition = `transform ${duration}ms cubic-bezier(.15,.7,.3,1), opacity ${duration}ms ease-in`;
+
+      document.body.appendChild(el);
+      requestAnimationFrame(() => {
+        el.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy + 240}px)) scale(${scale}) rotate(${rot}deg)`;
+        el.style.opacity = '0';
+      });
+      setTimeout(() => el.remove(), duration + 100);
+    }
+  }
+
+  function openOverlay() {
+    overlay.classList.remove('show');
+    void overlay.offsetWidth;
+    overlay.classList.add('show');
+  }
+
+  function showMessageCard(msg, closeColor) {
+    card.querySelector('img')?.remove();
+    emojiEl.style.display = '';
+    messageEl.style.display = '';
+    emojiEl.textContent = msg.emoji;
+    messageEl.textContent = msg.text;
+    closeBtn.className = 'close ' + closeColor;
+    openOverlay();
+  }
+
+  function showImageCard(url) {
+    emojiEl.style.display = 'none';
+    messageEl.style.display = 'none';
+    let img = card.querySelector('img.reveal-img');
+    if (!img) {
+      img = document.createElement('img');
+      img.className = 'reveal-img';
+      card.insertBefore(img, closeBtn);
+    }
+    img.src = url;
+    closeBtn.className = 'close green';
+    openOverlay();
+  }
+
+  let clicks = 0;
+  const SECRET_AT = 8;
+  const EXCITE_FROM = 3;
+
+  okunasiBtn.addEventListener('click', () => {
+    clicks++;
+    counterEl.textContent = 'basış sayısı: ' + clicks;
+
+    const isSecret = clicks === SECRET_AT;
+    const center = elCenter(okunasiBtn);
+
+    flashScreen(isSecret ? 'gold' : null);
+    if (isSecret) shakeScreen();
+    burstConfetti(center.x, center.y, isSecret ? 34 : 16, isSecret ? goldEmojis : confettiEmojis, isSecret);
+
+    kick(okunasiBtn, orbs[0]);
+    orbs[0].boostUntil = performance.now() + 900;
+
+    if (clicks === EXCITE_FROM) {
+      okunasiBtn.classList.add('excited');
+      secretHint.classList.add('show');
+    }
+    if (clicks >= SECRET_AT) {
+      caughtBadge.classList.add('show');
+      setTimeout(() => caughtBadge.classList.remove('show'), 1200);
+    }
+
+    showMessageCard(clicks === SECRET_AT ? secretMessage : nextMessage(), 'red');
+  });
+
+  dinleneseBtn.addEventListener('click', () => {
+    const center = elCenter(dinleneseBtn);
+    flashScreen('blue');
+    burstConfetti(center.x, center.y, 18, musicEmojis, false);
+    kick(dinleneseBtn, orbs[1]);
+
+    if (!nextVideo) {
+      showMessageCard({ emoji: "🎧", text: "Henüz şarkı linki eklenmedi — birazdan eklenecek!" }, 'blue');
+      return;
+    }
+    window.open(nextVideo(), '_blank');
+  });
+
+  bakilasiBtn.addEventListener('click', () => {
+    const center = elCenter(bakilasiBtn);
+    flashScreen('green');
+    burstConfetti(center.x, center.y, 18, eyeEmojis, false);
+    kick(bakilasiBtn, orbs[2]);
+
+    if (!nextImage) {
+      showMessageCard({ emoji: "👀", text: "Henüz görsel eklenmedi — birazdan eklenecek!" }, 'green');
+      return;
+    }
+    showImageCard(nextImage());
+  });
+
+  bestBtn.addEventListener('click', () => {
+    const center = elCenter(bestBtn);
+    flashScreen('gold');
+    burstConfetti(center.x, center.y, 20, bestEmojis, false);
+    kick(bestBtn, orbs[3]);
+
+    if (!nextBest) {
+      showMessageCard({ emoji: "🏆", text: "Henüz link eklenmedi — birazdan eklenecek!" }, 'gold');
+      return;
+    }
+    window.open(nextBest(), '_blank');
+  });
+
+  closeBtn.addEventListener('click', () => overlay.classList.remove('show'));
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+</script>
+
+</body>
+</html>
