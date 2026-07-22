@@ -17,6 +17,8 @@
     --card: rgba(255,255,255,0.08);
     --gold: #ffd23f;
     --gold-dark: #d69a00;
+    --purple: #b06bff;
+    --purple-dark: #7c3ce0;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -96,6 +98,7 @@
   .flash.blue { background: var(--blue); }
   .flash.green { background: var(--green); }
   .flash.gold { background: var(--gold); }
+  .flash.purple { background: var(--purple); }
   .flash.pop { animation: flashpop 0.4s ease-out; }
   @keyframes flashpop {
     0% { opacity: 0.5; }
@@ -188,6 +191,11 @@
     animation-delay: 1.2s;
     color: #402800;
   }
+  #tarifBtn {
+    background: radial-gradient(circle at 32% 28%, #d6adff, var(--purple) 55%, var(--purple-dark));
+    animation: breathe-purple 2.4s ease-in-out infinite;
+    animation-delay: 1.6s;
+  }
 
   @keyframes breathe-red {
     0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,87,0.5), 0 16px 40px rgba(0,0,0,0.4); }
@@ -204,6 +212,10 @@
   @keyframes breathe-gold {
     0%, 100% { box-shadow: 0 0 0 0 rgba(255,210,63,0.55), 0 16px 40px rgba(0,0,0,0.4); }
     50% { box-shadow: 0 0 0 14px rgba(255,210,63,0), 0 16px 40px rgba(0,0,0,0.4); }
+  }
+  @keyframes breathe-purple {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(176,107,255,0.55), 0 16px 40px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(176,107,255,0), 0 16px 40px rgba(0,0,0,0.4); }
   }
 
   #okunasiBtn.excited { animation: breathe-red 0.7s ease-in-out infinite; }
@@ -308,6 +320,131 @@
   .close.blue { background: var(--blue-dark); }
   .close.green { background: var(--green-dark); }
   .close.gold { background: var(--gold-dark); color: #402800; }
+  .close.purple { background: var(--purple-dark); }
+
+  .tarif-card {
+    max-width: 420px;
+    max-height: 82vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .tarif-card .tarif-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .tarif-card .tarif-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .tarif-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .tarif-tab {
+    flex: 1;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.65);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .tarif-tab.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: white;
+  }
+
+  .tarif-pane {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+  }
+
+  .tarif-category-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin: 4px 0 8px;
+  }
+  .tarif-card input {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border-radius: 14px;
+    padding: 13px 16px;
+    font-size: 15px;
+    margin-bottom: 12px;
+    outline: none;
+  }
+  .tarif-card input::placeholder { color: rgba(255,255,255,0.4); }
+  .tarif-card input:focus { border-color: var(--purple); }
+
+  .tarif-go {
+    border: none;
+    background: var(--purple);
+    color: white;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
+
+  .tarif-results {
+    overflow-y: auto;
+    text-align: left;
+    flex: 1;
+  }
+  .tarif-empty {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    padding: 10px 0 4px;
+  }
+  .tarif-section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    margin: 14px 0 8px;
+  }
+  .tarif-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .tarif-item .name {
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .tarif-item .recipe {
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.5;
+  }
+  .tarif-item.missing .name::after {
+    content: " · eksik: " attr(data-missing);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+  }
 
   .footer {
     position: fixed;
@@ -405,6 +542,11 @@
       <span class="icon">🏆</span>
       <span class="label">BEST</span>
     </button>
+
+    <button class="orb-btn" id="tarifBtn">
+      <span class="icon">🍸</span>
+      <span class="label">TAR-RİF</span>
+    </button>
   </div>
 
   <div class="footer">
@@ -423,6 +565,30 @@
       <span class="emoji" id="emoji">✨</span>
       <div class="message" id="message">Mesaj buraya gelecek</div>
       <button class="close red" id="closeBtn">tamam :)</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="tarifOverlay">
+    <div class="card tarif-card">
+      <div class="tarif-title">🍸 TAR-RİF</div>
+
+      <div class="tarif-tabs">
+        <button class="tarif-tab active" id="tabOneriBtn">Öneri</button>
+        <button class="tarif-tab" id="tabTumBtn">Kokteyl Tarifleri</button>
+      </div>
+
+      <div class="tarif-pane" id="paneOneri">
+        <div class="tarif-desc">Evdeki alkolleri virgülle ayırarak yaz, sana yapabileceğin kokteylleri bulayım.</div>
+        <input type="text" id="tarifInput" placeholder="örn: votka, cin, beyaz şarap">
+        <button class="tarif-go" id="tarifGoBtn">Tarifleri Bul</button>
+        <div class="tarif-results" id="tarifResults"></div>
+      </div>
+
+      <div class="tarif-pane" id="paneTum" style="display:none;">
+        <div class="tarif-results" id="tarifAllResults"></div>
+      </div>
+
+      <button class="close purple" id="tarifCloseBtn">kapat</button>
     </div>
   </div>
 
@@ -503,6 +669,7 @@
   const dinleneseBtn = document.getElementById('dinleneseBtn');
   const bakilasiBtn = document.getElementById('bakilasiBtn');
   const bestBtn = document.getElementById('bestBtn');
+  const tarifBtn = document.getElementById('tarifBtn');
   const overlay = document.getElementById('overlay');
   const card = document.getElementById('card');
   const messageEl = document.getElementById('message');
@@ -545,7 +712,7 @@
   const BOTTOM_SAFE = 60;
   const SIDE_SAFE = 8;
 
-  const ALL_BTNS = [okunasiBtn, dinleneseBtn, bakilasiBtn, bestBtn];
+  const ALL_BTNS = [okunasiBtn, dinleneseBtn, bakilasiBtn, bestBtn, tarifBtn];
 
   function randStart(i) {
     const w = window.innerWidth, h = window.innerHeight;
@@ -763,6 +930,213 @@
     window.open(nextBest(), '_blank');
   });
 
+  // ---- TAR-RİF: eldeki alkollere göre kokteyl tarifi ----
+  const spiritSynonyms = {
+    vodka: ["votka", "vodka"],
+    gin: ["cin", "gin"],
+    rum: ["rom", "rum"],
+    tequila: ["tekila", "tequila"],
+    whiskey: ["viski", "whiskey", "whisky", "bourbon", "rye"],
+    brandy: ["konyak", "kanyak", "brandy", "cognac"],
+    raki: ["rakı", "raki"],
+    redwine: ["kırmızı şarap", "kirmizi sarap", "red wine", "kırmızı şarabı"],
+    whitewine: ["beyaz şarap", "beyaz sarap", "white wine"],
+    sparkling: ["şampanya", "sampanya", "köpüklü şarap", "kopuklu sarap", "prosecco"],
+    vermouth: ["vermut", "vermouth"],
+    tripleSec: ["triple sec", "cointreau", "portakal likörü", "portakal likoru"],
+    kahlua: ["kahlua", "kahve likörü", "kahve likoru"],
+    campari: ["campari"],
+    aperol: ["aperol"],
+    peachLiqueur: ["şeftali likörü", "seftali likoru", "peach schnapps"],
+    absinthe: ["absinthe", "apsent"],
+    maraschino: ["maraschino", "mareskino", "mareşino"],
+    chartreuse: ["chartreuse", "şartröz", "sartroz"],
+  };
+
+  const spiritLabels = {
+    vodka: "votka", gin: "cin", rum: "rom", tequila: "tekila", whiskey: "viski",
+    brandy: "konyak", raki: "rakı", redwine: "kırmızı şarap", whitewine: "beyaz şarap",
+    sparkling: "köpüklü şarap", vermouth: "vermut", tripleSec: "portakal likörü",
+    kahlua: "kahve likörü", campari: "campari", aperol: "aperol", peachLiqueur: "şeftali likörü",
+    absinthe: "absinthe", maraschino: "maraschino likörü", chartreuse: "chartreuse",
+  };
+
+  const cocktails = [
+    // ---- Klasikler (20) ----
+    { name: "Vodka Soda", cat: "Klasikler", need: ["vodka"], recipe: "Votkanın üzerine soda ve bol buz, dilimlenmiş limonla servis et." },
+    { name: "Screwdriver", cat: "Klasikler", need: ["vodka"], recipe: "Votka + portakal suyu, buzla karıştır." },
+    { name: "Cosmopolitan", cat: "Klasikler", need: ["vodka", "tripleSec"], recipe: "Votka, portakal likörü, cranberry suyu ve az limon; shaker'da çalkala, süzerek servis et." },
+    { name: "White Russian", cat: "Klasikler", need: ["vodka", "kahlua"], recipe: "Votka + kahve likörü, üzerine süt/krema gezdir, buzla." },
+    { name: "Espresso Martini", cat: "Klasikler", need: ["vodka", "kahlua"], recipe: "Votka, kahve likörü ve soğuk bir shot espresso; shaker'da sertçe çalkala." },
+    { name: "Bloody Mary", cat: "Klasikler", need: ["vodka"], recipe: "Votka, domates suyu, limon, tuz-karabiber ve birkaç damla acı sos; karıştır." },
+    { name: "Gin Tonic", cat: "Klasikler", need: ["gin"], recipe: "Cin üzerine tonik, bol buz ve limon dilimi." },
+    { name: "Negroni", cat: "Klasikler", need: ["gin", "vermouth", "campari"], recipe: "Eşit ölçüde cin, kırmızı vermut ve campari; buzla karıştır, portakal kabuğuyla süsle." },
+    { name: "Dry Martini", cat: "Klasikler", need: ["gin", "vermouth"], recipe: "Cin ve az kuru vermut; buzla karıştır, zeytin ya da limon kabuğuyla süsle." },
+    { name: "Mojito", cat: "Klasikler", need: ["rum"], recipe: "Rom, nane yaprakları, limon, şeker ve soda; önce nane ve limonu hafifçe ez." },
+    { name: "Cuba Libre", cat: "Klasikler", need: ["rum"], recipe: "Rom + kola + limon dilimi, buzla." },
+    { name: "Piña Colada", cat: "Klasikler", need: ["rum"], recipe: "Rom, ananas suyu ve hindistancevizi kreması; blenderdan geçir." },
+    { name: "Daiquiri", cat: "Klasikler", need: ["rum"], recipe: "Rom, limon suyu ve şeker şurubu; çalkala, süzerek servis et." },
+    { name: "Margarita", cat: "Klasikler", need: ["tequila", "tripleSec"], recipe: "Tekila, portakal likörü ve limon suyu; kadehin kenarını tuzla." },
+    { name: "Tequila Sunrise", cat: "Klasikler", need: ["tequila"], recipe: "Tekila + portakal suyu, dibine birkaç damla grenadin şurubu damlat." },
+    { name: "Whiskey Sour", cat: "Klasikler", need: ["whiskey"], recipe: "Viski, limon suyu ve şeker şurubu; shaker'da çalkala." },
+    { name: "Old Fashioned", cat: "Klasikler", need: ["whiskey"], recipe: "Viski, bir küp şeker, birkaç damla bitters, portakal kabuğu; yavaşça karıştır." },
+    { name: "Manhattan", cat: "Klasikler", need: ["whiskey", "vermouth"], recipe: "Viski + kırmızı vermut + birkaç damla bitters; karıştır, kirazla süsle." },
+    { name: "Mimosa", cat: "Klasikler", need: ["sparkling"], recipe: "Köpüklü şarap + portakal suyu, eşit oranda." },
+    { name: "Aperol Spritz", cat: "Klasikler", need: ["aperol", "sparkling"], recipe: "Aperol, köpüklü şarap ve soda; eşit ölçüde, bol buzla." },
+
+    // ---- Az Bilinenler (10) ----
+    { name: "Sazerac", cat: "Az Bilinenler", need: ["whiskey", "absinthe"], recipe: "Kadehi az absinthe ile çalkalayıp boşalt; üzerine viski, bir küp şeker ve bitters ekleyip karıştır." },
+    { name: "Corpse Reviver No. 2", cat: "Az Bilinenler", need: ["gin", "tripleSec", "absinthe"], recipe: "Cin, portakal likörü, limon suyu ve bir damla absinthe; eşit ölçülerde çalkala." },
+    { name: "Aviation", cat: "Az Bilinenler", need: ["gin", "maraschino"], recipe: "Cin, maraschino likörü ve limon suyu; buzla sertçe çalkala, süzerek servis et." },
+    { name: "Last Word", cat: "Az Bilinenler", need: ["gin", "chartreuse", "maraschino"], recipe: "Eşit ölçüde cin, yeşil chartreuse, maraschino likörü ve limon suyu; çalkalayıp süz." },
+    { name: "Paper Plane", cat: "Az Bilinenler", need: ["whiskey", "aperol"], recipe: "Eşit ölçüde viski, aperol ve limon suyu; buzla çalkala." },
+    { name: "Boulevardier", cat: "Az Bilinenler", need: ["whiskey", "vermouth", "campari"], recipe: "Viski, kırmızı vermut ve campari eşit ölçüde; buzla karıştır." },
+    { name: "Vieux Carré", cat: "Az Bilinenler", need: ["whiskey", "brandy", "vermouth"], recipe: "Viski, konyak, kırmızı vermut ve birkaç damla bitters; karıştır." },
+    { name: "Penicillin", cat: "Az Bilinenler", need: ["whiskey"], recipe: "Viski, limon suyu, bal-zencefil şurubu; üzerine az miktarda daha yoğun bir viski gezdir." },
+    { name: "Clover Club", cat: "Az Bilinenler", need: ["gin"], recipe: "Cin, limon suyu, ahududu şurubu ve yumurta akı; sertçe çalkala." },
+    { name: "Jungle Bird", cat: "Az Bilinenler", need: ["rum", "campari"], recipe: "Koyu rom, campari, ananas suyu, limon suyu ve az şeker şurubu; çalkala." },
+  ];
+
+  function normalize(s) {
+    return s
+      .toLocaleLowerCase('tr')
+      .replace(/ı/g, 'i')
+      .trim();
+  }
+
+  function parseUserSpirits(raw) {
+    const tokens = raw.split(',').map((t) => normalize(t)).filter(Boolean);
+    const found = new Set();
+    const unknown = [];
+
+    tokens.forEach((token) => {
+      let matchedKey = null;
+
+      for (const [key, syns] of Object.entries(spiritSynonyms)) {
+        const hit = syns.some((syn) => {
+          const n = normalize(syn);
+          return token === n || token.includes(n) || n.includes(token);
+        });
+        if (hit) { matchedKey = key; break; }
+      }
+
+      if (matchedKey) found.add(matchedKey);
+      else unknown.push(token);
+    });
+
+    return { found, unknown };
+  }
+
+  function cocktailItemHtml(c, missingLabel) {
+    const missingAttr = missingLabel ? ` data-missing="${missingLabel}"` : '';
+    const cls = missingLabel ? 'tarif-item missing' : 'tarif-item';
+    return `<div class="${cls}"${missingAttr}><div class="name">🍸 ${c.name}</div><div class="recipe">${c.recipe}</div></div>`;
+  }
+
+  function renderTarifResults(userSet, unknownTokens) {
+    const results = document.getElementById('tarifResults');
+    results.innerHTML = '';
+
+    if (userSet.size === 0) {
+      results.innerHTML = '<div class="tarif-empty">Elindeki alkolleri virgülle ayırarak yazıp "Tarifleri Bul"a bas 🍹</div>';
+      return;
+    }
+
+    const makable = [];
+    const almost = [];
+
+    cocktails.forEach((c) => {
+      const missing = c.need.filter((n) => !userSet.has(n));
+      if (missing.length === 0) makable.push(c);
+      else if (missing.length === 1) almost.push({ ...c, missing: spiritLabels[missing[0]] });
+    });
+
+    let html = '';
+
+    if (unknownTokens.length > 0) {
+      html += `<div class="tarif-empty">🤔 tanımadığım: ${unknownTokens.join(', ')}</div>`;
+    }
+
+    if (makable.length === 0) {
+      html += '<div class="tarif-empty">Elindekilerle tam oturan bir tarif bulamadım 😅 Ama az kalanlara bak:</div>';
+    } else {
+      html += '<div class="tarif-section-label">Yapabileceklerin</div>';
+      html += makable.map((c) => cocktailItemHtml(c)).join('');
+    }
+
+    if (almost.length > 0) {
+      html += '<div class="tarif-section-label">Az Kalsın (tek eksik)</div>';
+      html += almost.slice(0, 6).map((c) => cocktailItemHtml(c, c.missing)).join('');
+    }
+
+    results.innerHTML = html;
+  }
+
+  function renderAllRecipes() {
+    const container = document.getElementById('tarifAllResults');
+    const categories = ["Klasikler", "Az Bilinenler"];
+    let html = '';
+    categories.forEach((cat) => {
+      html += `<div class="tarif-category-label">${cat}</div>`;
+      html += cocktails.filter((c) => c.cat === cat).map((c) => cocktailItemHtml(c)).join('');
+    });
+    container.innerHTML = html;
+  }
+
+  const tarifOverlay = document.getElementById('tarifOverlay');
+  const tarifInput = document.getElementById('tarifInput');
+  const tarifGoBtn = document.getElementById('tarifGoBtn');
+  const tarifCloseBtn = document.getElementById('tarifCloseBtn');
+  const tabOneriBtn = document.getElementById('tabOneriBtn');
+  const tabTumBtn = document.getElementById('tabTumBtn');
+  const paneOneri = document.getElementById('paneOneri');
+  const paneTum = document.getElementById('paneTum');
+
+  let allRecipesRendered = false;
+
+  tabOneriBtn.addEventListener('click', () => {
+    tabOneriBtn.classList.add('active');
+    tabTumBtn.classList.remove('active');
+    paneOneri.style.display = 'flex';
+    paneTum.style.display = 'none';
+  });
+
+  tabTumBtn.addEventListener('click', () => {
+    tabTumBtn.classList.add('active');
+    tabOneriBtn.classList.remove('active');
+    paneTum.style.display = 'flex';
+    paneOneri.style.display = 'none';
+    if (!allRecipesRendered) {
+      renderAllRecipes();
+      allRecipesRendered = true;
+    }
+  });
+
+  tarifBtn.addEventListener('click', () => {
+    const center = elCenter(tarifBtn);
+    flashScreen('purple');
+    burstConfetti(center.x, center.y, 18, ["🍸", "🍹", "🥃", "✨", "🍾"], false);
+    kick(tarifBtn, orbs[4]);
+
+    tarifOverlay.classList.remove('show');
+    void tarifOverlay.offsetWidth;
+    tarifOverlay.classList.add('show');
+    setTimeout(() => tarifInput.focus(), 300);
+  });
+
+  function runTarifSearch() {
+    const { found, unknown } = parseUserSpirits(tarifInput.value);
+    renderTarifResults(found, unknown);
+  }
+
+  tarifGoBtn.addEventListener('click', runTarifSearch);
+  tarifInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') runTarifSearch();
+  });
+
+  tarifCloseBtn.addEventListener('click', () => tarifOverlay.classList.remove('show'));
+  tarifOverlay.addEventListener('click', (e) => { if (e.target === tarifOverlay) tarifOverlay.classList.remove('show'); });
+
   closeBtn.addEventListener('click', () => overlay.classList.remove('show'));
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
 
@@ -819,30 +1193,38 @@
   applyTimeOfDay();
   setInterval(applyTimeOfDay, 5 * 60 * 1000); // sayfa açık kalırsa güncelle
 
-  // ---- imleç/parmak izi konfeti kuyruğu ----
-  const trailEmojis = ["✨", "💫", "⭐", "💖", "🌟"];
+  // ---- imleç/parmak izi: renkli "Gülşah" yazı kuyruğu ----
+  const trailWord = "Gülşah";
+  const trailPalette = ["#ff6b9d", "#ffd23f", "#4f9dff", "#2fd88f", "#b06bff", "#ff9f4f"];
   let lastTrailTime = 0;
 
   function spawnTrailParticle(x, y) {
     const el = document.createElement('div');
     el.className = 'trail-particle';
-    el.textContent = trailEmojis[Math.floor(Math.random() * trailEmojis.length)];
 
-    const size = 12 + Math.random() * 10;
-    const driftX = (Math.random() - 0.5) * 40;
-    const driftY = -30 - Math.random() * 30;
-    const duration = 650 + Math.random() * 300;
+    el.innerHTML = trailWord
+      .split('')
+      .map((ch, i) => `<span style="color:${trailPalette[i % trailPalette.length]}">${ch}</span>`)
+      .join('');
+
+    const size = 13 + Math.random() * 6;
+    const driftX = (Math.random() - 0.5) * 30;
+    const driftY = -26 - Math.random() * 24;
+    const duration = 1000 + Math.random() * 400;
 
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     el.style.fontSize = size + 'px';
-    el.style.opacity = '0.9';
+    el.style.fontWeight = '800';
+    el.style.whiteSpace = 'nowrap';
+    el.style.textShadow = '0 2px 8px rgba(0,0,0,0.45)';
+    el.style.opacity = '0.95';
     el.style.transform = 'translate(-50%,-50%) scale(1)';
     el.style.transition = `transform ${duration}ms ease-out, opacity ${duration}ms ease-in`;
 
     document.body.appendChild(el);
     requestAnimationFrame(() => {
-      el.style.transform = `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(0.6)`;
+      el.style.transform = `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(0.75)`;
       el.style.opacity = '0';
     });
     setTimeout(() => el.remove(), duration + 80);
@@ -850,7 +1232,7 @@
 
   function handlePointerTrail(x, y) {
     const now = performance.now();
-    if (now - lastTrailTime < 90) return;
+    if (now - lastTrailTime < 140) return;
     lastTrailTime = now;
     spawnTrailParticle(x, y);
   }
