@@ -32,6 +32,33 @@
     position: relative;
     -webkit-user-select: none;
     user-select: none;
+    transition: background 1.4s ease;
+  }
+
+  /* günün saatine göre atmosfer */
+  body.tod-morning  { --bg-top: #3a2712; --bg-bottom: #201607; }
+  body.tod-afternoon{ --bg-top: #2b0f1a; --bg-bottom: #1a0f14; }
+  body.tod-evening  { --bg-top: #2c0f2e; --bg-bottom: #170a1c; }
+  body.tod-night    { --bg-top: #0b0e1c; --bg-bottom: #05060d; }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  .stars.show { opacity: 1; }
+  .star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: 1; }
   }
 
   body.shake { animation: shake 0.5s ease; }
@@ -304,9 +331,47 @@
     transition: opacity 0.4s ease;
   }
   .secret-hint.show { opacity: 1; }
+
+  .trail-particle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 4;
+    will-change: transform, opacity;
+  }
+
+  .secret-zone {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 64px;
+    height: 64px;
+    z-index: 3;
+    background: transparent;
+  }
+
+  .secret-orb {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 7;
+    background: radial-gradient(circle at 32% 28%, #ffb3d9, #ff5fa8 55%, #c22f80);
+    box-shadow: 0 0 0 0 rgba(255,95,168,0.6), 0 20px 50px rgba(0,0,0,0.5);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.55s cubic-bezier(.2,1.8,.35,1);
+    animation: breathe-secret 1.8s ease-in-out infinite;
+  }
+  .secret-orb.show { transform: translate(-50%, -50%) scale(1); }
+  @keyframes breathe-secret {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,95,168,0.6), 0 20px 50px rgba(0,0,0,0.5); }
+    50% { box-shadow: 0 0 0 20px rgba(255,95,168,0), 0 20px 50px rgba(0,0,0,0.5); }
+  }
 </style>
 </head>
 <body>
+
+  <div class="stars" id="stars"></div>
 
   <div class="blob b1"></div>
   <div class="blob b2"></div>
@@ -316,7 +381,7 @@
 
   <div class="header">
     <div class="title">ACİL SIKILDIM UYGULAMASI</div>
-    <div class="subtitle">Buraya en sıkıldığın anlarda ya da ansızın gelebilirsin Gülşah! 👇</div>
+    <div class="subtitle" id="subtitle">Buraya en sıkıldığın anlarda ya da ansızın gelebilirsin Gülşah! 👇</div>
   </div>
 
   <div class="stage" id="stage">
@@ -346,6 +411,12 @@
     <div class="counter" id="counter"></div>
     <div class="secret-hint" id="secretHint">🔒 OKUNASI'ya birkaç kere daha bas, bir sır açılsın</div>
   </div>
+
+  <div class="secret-zone" id="secretZone"></div>
+  <button class="orb-btn secret-orb" id="secretBtn" style="display:none;">
+    <span class="icon">💝</span>
+    <span class="label">?</span>
+  </button>
 
   <div class="overlay" id="overlay">
     <div class="card" id="card">
@@ -673,6 +744,141 @@
 
   closeBtn.addEventListener('click', () => overlay.classList.remove('show'));
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+
+  // ---- günün saatine göre atmosfer ----
+  const subtitleEl = document.getElementById('subtitle');
+  const starsEl = document.getElementById('stars');
+
+  const timeTexts = {
+    morning: "Günaydın Gülşah! Gününe küçük bir mola vermek istersen buradayım 👇",
+    afternoon: "Buraya en sıkıldığın anlarda ya da ansızın gelebilirsin Gülşah! 👇",
+    evening: "Akşamın yorgunluğuna küçük bir es lazımsa, tam yerindesin Gülşah 👇",
+    night: "Uyuyamadın mı yoksa? Gece yarısı buraya düşmek de bir gülümseme sebebi Gülşah 🌙",
+  };
+
+  function timeOfDay() {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 11) return 'morning';
+    if (h >= 11 && h < 17) return 'afternoon';
+    if (h >= 17 && h < 21) return 'evening';
+    return 'night';
+  }
+
+  function buildStars() {
+    if (starsEl.childElementCount > 0) return;
+    const count = 60;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = 1 + Math.random() * 2;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = Math.random() * 100 + '%';
+      s.style.top = Math.random() * 100 + '%';
+      s.style.animationDelay = (Math.random() * 3) + 's';
+      s.style.animationDuration = (2 + Math.random() * 3) + 's';
+      starsEl.appendChild(s);
+    }
+  }
+
+  function applyTimeOfDay() {
+    const tod = timeOfDay();
+    document.body.classList.remove('tod-morning', 'tod-afternoon', 'tod-evening', 'tod-night');
+    document.body.classList.add('tod-' + tod);
+    subtitleEl.textContent = timeTexts[tod];
+
+    if (tod === 'night') {
+      buildStars();
+      starsEl.classList.add('show');
+    } else {
+      starsEl.classList.remove('show');
+    }
+  }
+
+  applyTimeOfDay();
+  setInterval(applyTimeOfDay, 5 * 60 * 1000); // sayfa açık kalırsa güncelle
+
+  // ---- imleç/parmak izi konfeti kuyruğu ----
+  const trailEmojis = ["✨", "💫", "⭐", "💖", "🌟"];
+  let lastTrailTime = 0;
+
+  function spawnTrailParticle(x, y) {
+    const el = document.createElement('div');
+    el.className = 'trail-particle';
+    el.textContent = trailEmojis[Math.floor(Math.random() * trailEmojis.length)];
+
+    const size = 12 + Math.random() * 10;
+    const driftX = (Math.random() - 0.5) * 40;
+    const driftY = -30 - Math.random() * 30;
+    const duration = 650 + Math.random() * 300;
+
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.fontSize = size + 'px';
+    el.style.opacity = '0.9';
+    el.style.transform = 'translate(-50%,-50%) scale(1)';
+    el.style.transition = `transform ${duration}ms ease-out, opacity ${duration}ms ease-in`;
+
+    document.body.appendChild(el);
+    requestAnimationFrame(() => {
+      el.style.transform = `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(0.6)`;
+      el.style.opacity = '0';
+    });
+    setTimeout(() => el.remove(), duration + 80);
+  }
+
+  function handlePointerTrail(x, y) {
+    const now = performance.now();
+    if (now - lastTrailTime < 90) return;
+    lastTrailTime = now;
+    spawnTrailParticle(x, y);
+  }
+
+  window.addEventListener('pointermove', (e) => handlePointerTrail(e.clientX, e.clientY));
+  window.addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    if (t) handlePointerTrail(t.clientX, t.clientY);
+  }, { passive: true });
+
+  // ---- gizli buton: sağ alt köşeye 3 saniye basılı tut ----
+  const secretZone = document.getElementById('secretZone');
+  const secretBtn = document.getElementById('secretBtn');
+  let secretPressTimer = null;
+  let secretUsed = false;
+
+  function startSecretPress() {
+    if (secretUsed) return;
+    secretPressTimer = setTimeout(revealSecret, 3000);
+  }
+  function cancelSecretPress() {
+    clearTimeout(secretPressTimer);
+  }
+
+  secretZone.addEventListener('mousedown', startSecretPress);
+  secretZone.addEventListener('touchstart', startSecretPress, { passive: true });
+  ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach((ev) => {
+    secretZone.addEventListener(ev, cancelSecretPress);
+  });
+
+  function revealSecret() {
+    secretUsed = true;
+    secretBtn.style.display = 'flex';
+    requestAnimationFrame(() => secretBtn.classList.add('show'));
+  }
+
+  secretBtn.addEventListener('click', () => {
+    const center = elCenter(secretBtn);
+    burstConfetti(center.x, center.y, 30, ["💖", "💝", "✨", "🏆", "🌟"], true);
+    showMessageCard(
+      { emoji: "💝", text: "Bunu bulman uzun sürmedi bile...\nBuraya senin için en özel, sadece bu gizli butonda çıkacak mesajı ekleyeceğiz." },
+      'gold'
+    );
+    secretBtn.classList.remove('show');
+    setTimeout(() => {
+      secretBtn.style.display = 'none';
+      secretUsed = false; // tekrar bulunabilsin
+    }, 550);
+  });
 </script>
 
 </body>
