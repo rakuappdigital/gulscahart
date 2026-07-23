@@ -19,6 +19,8 @@
     --gold-dark: #d69a00;
     --purple: #b06bff;
     --purple-dark: #7c3ce0;
+    --teal: #2fd8d8;
+    --teal-dark: #1a9d9d;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -99,6 +101,7 @@
   .flash.green { background: var(--green); }
   .flash.gold { background: var(--gold); }
   .flash.purple { background: var(--purple); }
+  .flash.teal { background: var(--teal); }
   .flash.pop { animation: flashpop 0.4s ease-out; }
   @keyframes flashpop {
     0% { opacity: 0.5; }
@@ -196,6 +199,11 @@
     animation: breathe-purple 2.4s ease-in-out infinite;
     animation-delay: 1.6s;
   }
+  #oynanasiBtn {
+    background: radial-gradient(circle at 32% 28%, #9df3f3, var(--teal) 55%, var(--teal-dark));
+    animation: breathe-teal 2.4s ease-in-out infinite;
+    animation-delay: 2s;
+  }
 
   @keyframes breathe-red {
     0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,87,0.5), 0 16px 40px rgba(0,0,0,0.4); }
@@ -216,6 +224,10 @@
   @keyframes breathe-purple {
     0%, 100% { box-shadow: 0 0 0 0 rgba(176,107,255,0.55), 0 16px 40px rgba(0,0,0,0.4); }
     50% { box-shadow: 0 0 0 14px rgba(176,107,255,0), 0 16px 40px rgba(0,0,0,0.4); }
+  }
+  @keyframes breathe-teal {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(47,216,216,0.55), 0 16px 40px rgba(0,0,0,0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(47,216,216,0), 0 16px 40px rgba(0,0,0,0.4); }
   }
 
   #okunasiBtn.excited { animation: breathe-red 0.7s ease-in-out infinite; }
@@ -321,6 +333,93 @@
   .close.green { background: var(--green-dark); }
   .close.gold { background: var(--gold-dark); color: #402800; }
   .close.purple { background: var(--purple-dark); }
+  .close.teal { background: var(--teal-dark); }
+
+  .game-card {
+    max-width: 380px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .game-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: white;
+    border-radius: 16px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .game-item .g-icon { font-size: 26px; }
+  .game-item .g-name { font-weight: 800; font-size: 15px; display: block; }
+  .game-item .g-hint { font-size: 11px; color: rgba(255,255,255,0.5); display: block; margin-top: 2px; }
+  .game-item.soon { opacity: 0.55; }
+
+  .game-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .game-back {
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .game-score-label {
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--teal);
+  }
+
+  #gameCanvas {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    max-height: 55vh;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #7fd8f2, #bff0e0);
+    display: block;
+    touch-action: none;
+  }
+
+  .game-over-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(5,10,15,0.6);
+    border-radius: 16px;
+  }
+  .game-over-title {
+    font-size: 22px;
+    font-weight: 800;
+  }
+  #gameOverScore {
+    font-size: 15px;
+    color: rgba(255,255,255,0.8);
+  }
+  #gameArea {
+    position: relative;
+  }
 
   .tarif-card {
     max-width: 420px;
@@ -547,6 +646,11 @@
       <span class="icon">🍸</span>
       <span class="label">TAR-RİF</span>
     </button>
+
+    <button class="orb-btn" id="oynanasiBtn">
+      <span class="icon">🎮</span>
+      <span class="label">OYNANASI</span>
+    </button>
   </div>
 
   <div class="footer">
@@ -589,6 +693,31 @@
       </div>
 
       <button class="close purple" id="tarifCloseBtn">kapat</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="gameOverlay">
+    <div class="card game-card">
+      <div id="gameMenu">
+        <div class="tarif-title">🎮 OYNANASI</div>
+        <div class="tarif-desc">Canın sıkıldıysa küçük bir oyun oyna.</div>
+        <div class="game-list" id="gameList"></div>
+      </div>
+
+      <div id="gameArea" style="display:none;">
+        <div class="game-topbar">
+          <button class="game-back" id="gameBackBtn">‹ Menü</button>
+          <div class="game-score-label" id="gameScoreLabel">Skor: 0</div>
+        </div>
+        <canvas id="gameCanvas" width="320" height="480"></canvas>
+        <div class="game-over-panel" id="gameOverPanel" style="display:none;">
+          <div class="game-over-title">Oyun Bitti 💔</div>
+          <div id="gameOverScore"></div>
+          <button class="tarif-go" id="gameRestartBtn">Tekrar Oyna</button>
+        </div>
+      </div>
+
+      <button class="close teal" id="gameCloseBtn">kapat</button>
     </div>
   </div>
 
@@ -670,6 +799,7 @@
   const bakilasiBtn = document.getElementById('bakilasiBtn');
   const bestBtn = document.getElementById('bestBtn');
   const tarifBtn = document.getElementById('tarifBtn');
+  const oynanasiBtn = document.getElementById('oynanasiBtn');
   const overlay = document.getElementById('overlay');
   const card = document.getElementById('card');
   const messageEl = document.getElementById('message');
@@ -712,7 +842,7 @@
   const BOTTOM_SAFE = 60;
   const SIDE_SAFE = 8;
 
-  const ALL_BTNS = [okunasiBtn, dinleneseBtn, bakilasiBtn, bestBtn, tarifBtn];
+  const ALL_BTNS = [okunasiBtn, dinleneseBtn, bakilasiBtn, bestBtn, tarifBtn, oynanasiBtn];
 
   function randStart(i) {
     const w = window.innerWidth, h = window.innerHeight;
@@ -1136,6 +1266,302 @@
 
   tarifCloseBtn.addEventListener('click', () => tarifOverlay.classList.remove('show'));
   tarifOverlay.addEventListener('click', (e) => { if (e.target === tarifOverlay) tarifOverlay.classList.remove('show'); });
+
+  // ---- OYNANASI: mini oyun menüsü ----
+  const games = [
+    { id: "gulsahBird", name: "Gülşah Bird", icon: "🐦", ready: true },
+    { id: "soon1", name: "Hafıza Kartları", icon: "🧠", ready: false },
+    { id: "soon2", name: "Kazı Kazan", icon: "🪙", ready: false },
+    { id: "soon3", name: "Ne Kadar Tanıyorsun", icon: "❓", ready: false },
+    { id: "soon4", name: "Kalp Yakala", icon: "💘", ready: false },
+  ];
+
+  const gameOverlay = document.getElementById('gameOverlay');
+  const gameCloseBtn = document.getElementById('gameCloseBtn');
+  const gameListEl = document.getElementById('gameList');
+  const gameMenuEl = document.getElementById('gameMenu');
+  const gameAreaEl = document.getElementById('gameArea');
+  const gameBackBtn = document.getElementById('gameBackBtn');
+  const gameCanvas = document.getElementById('gameCanvas');
+  const gameCtx = gameCanvas.getContext('2d');
+  const gameScoreLabel = document.getElementById('gameScoreLabel');
+  const gameOverPanel = document.getElementById('gameOverPanel');
+  const gameOverScore = document.getElementById('gameOverScore');
+  const gameRestartBtn = document.getElementById('gameRestartBtn');
+
+  function renderGameList() {
+    gameListEl.innerHTML = games.map((g) => `
+      <button class="game-item ${g.ready ? '' : 'soon'}" data-id="${g.id}">
+        <span class="g-icon">${g.icon}</span>
+        <span>
+          <span class="g-name">${g.name}</span>
+          <span class="g-hint">${g.ready ? 'oyna' : 'yakında'}</span>
+        </span>
+      </button>
+    `).join('');
+
+    gameListEl.querySelectorAll('.game-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const g = games.find((x) => x.id === id);
+        if (!g.ready) return;
+        openGame(id);
+      });
+    });
+  }
+  renderGameList();
+
+  function showGameMenu() {
+    stopGulsahBird();
+    gameMenuEl.style.display = 'block';
+    gameAreaEl.style.display = 'none';
+  }
+
+  function openGame(id) {
+    gameMenuEl.style.display = 'none';
+    gameAreaEl.style.display = 'block';
+    gameOverPanel.style.display = 'none';
+    if (id === 'gulsahBird') startGulsahBird();
+  }
+
+  oynanasiBtn.addEventListener('click', () => {
+    const center = elCenter(oynanasiBtn);
+    flashScreen('teal');
+    burstConfetti(center.x, center.y, 18, ["🎮", "🕹️", "✨", "🐦", "🏆"], false);
+    kick(oynanasiBtn, orbs[5]);
+
+    showGameMenu();
+    gameOverlay.classList.remove('show');
+    void gameOverlay.offsetWidth;
+    gameOverlay.classList.add('show');
+  });
+
+  gameBackBtn.addEventListener('click', showGameMenu);
+  gameCloseBtn.addEventListener('click', () => { gameOverlay.classList.remove('show'); stopGulsahBird(); });
+  gameOverlay.addEventListener('click', (e) => { if (e.target === gameOverlay) { gameOverlay.classList.remove('show'); stopGulsahBird(); } });
+
+  // ---- Gülşah Bird (basit Flappy Bird klonu) ----
+  const GB_W = gameCanvas.width;
+  const GB_H = gameCanvas.height;
+  const GB_GRAVITY = 0.4;
+  const GB_FLAP = -7;
+  const GB_PIPE_W = 56;
+  const GB_PIPE_GAP = 150;
+  const GB_PIPE_SPACING = 190;
+  const GB_SPEED = 2.6;
+  const GB_GROUND_H = 30;
+  const GB_GROUND_Y = GB_H - GB_GROUND_H;
+  const GB_CAP_H = 22;
+  const GB_CAP_OVER = 7;
+
+  const gbClouds = [
+    { x: 40, y: 60, r: 22 },
+    { x: 140, y: 100, r: 16 },
+    { x: 230, y: 50, r: 26 },
+    { x: 280, y: 130, r: 14 },
+  ];
+
+  let gb = null;
+  let gbRAF = null;
+
+  function gbReset() {
+    gb = {
+      birdY: GB_H / 2,
+      birdV: 0,
+      pipes: [{ x: GB_W + 60, gapY: 140 }],
+      score: 0,
+      state: 'ready', // ready | playing | over
+    };
+    gameOverPanel.style.display = 'none';
+    gameScoreLabel.textContent = 'Skor: 0';
+  }
+
+  function gbFlap() {
+    if (gb.state === 'over') return;
+    if (gb.state === 'ready') gb.state = 'playing';
+    gb.birdV = GB_FLAP;
+  }
+
+  function gbSpawnPipeIfNeeded() {
+    const last = gb.pipes[gb.pipes.length - 1];
+    if (GB_W - last.x >= GB_PIPE_SPACING) {
+      const margin = 60;
+      const gapY = margin + Math.random() * (GB_H - margin * 2 - GB_PIPE_GAP);
+      gb.pipes.push({ x: GB_W + GB_PIPE_W, gapY, passed: false });
+    }
+  }
+
+  function gbUpdate() {
+    if (gb.state === 'playing') {
+      gb.birdV += GB_GRAVITY;
+      gb.birdY += gb.birdV;
+
+      gb.pipes.forEach((p) => { p.x -= GB_SPEED; });
+      gb.pipes = gb.pipes.filter((p) => p.x > -GB_PIPE_W);
+      gbSpawnPipeIfNeeded();
+
+      const birdX = 70, birdR = 14;
+
+      gb.pipes.forEach((p) => {
+        if (!p.passed && p.x + GB_PIPE_W < birdX) {
+          p.passed = true;
+          gb.score++;
+          gameScoreLabel.textContent = 'Skor: ' + gb.score;
+        }
+        const overlapX = birdX + birdR > p.x && birdX - birdR < p.x + GB_PIPE_W;
+        if (overlapX) {
+          const inGap = gb.birdY - birdR > p.gapY && gb.birdY + birdR < p.gapY + GB_PIPE_GAP;
+          if (!inGap) gbGameOver();
+        }
+      });
+
+      if (gb.birdY + birdR > GB_GROUND_Y || gb.birdY - birdR < 0) gbGameOver();
+
+      gbClouds.forEach((c) => {
+        c.x -= GB_SPEED * 0.25;
+        if (c.x < -30) c.x = GB_W + 30;
+      });
+    }
+  }
+
+  function gbGameOver() {
+    if (gb.state === 'over') return;
+    gb.state = 'over';
+    gameOverScore.textContent = 'Skor: ' + gb.score;
+    gameOverPanel.style.display = 'flex';
+  }
+
+  function gbDrawPipeSegment(ctx, x, y, w, h) {
+    if (h <= 0) return;
+    const grad = ctx.createLinearGradient(x, 0, x + w, 0);
+    grad.addColorStop(0, '#1e8449');
+    grad.addColorStop(0.18, '#58e08a');
+    grad.addColorStop(0.5, '#2ecc71');
+    grad.addColorStop(1, '#166638');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y, w - 2, h);
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fillRect(x + w * 0.16, y, w * 0.14, h);
+  }
+
+  function gbDrawPipeCap(ctx, x, y) {
+    const w = GB_PIPE_W + GB_CAP_OVER * 2;
+    const cx = x - GB_CAP_OVER;
+    const grad = ctx.createLinearGradient(cx, 0, cx + w, 0);
+    grad.addColorStop(0, '#166638');
+    grad.addColorStop(0.18, '#4fd684');
+    grad.addColorStop(0.5, '#27ae60');
+    grad.addColorStop(1, '#0f4d28');
+    ctx.fillStyle = grad;
+    ctx.fillRect(cx, y, w, GB_CAP_H);
+    ctx.strokeStyle = 'rgba(0,0,0,0.32)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(cx + 1, y + 1, w - 2, GB_CAP_H - 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.fillRect(cx + w * 0.14, y + 3, w * 0.12, GB_CAP_H - 6);
+  }
+
+  function gbDrawPipe(ctx, p) {
+    const topH = p.gapY - GB_CAP_H;
+    gbDrawPipeSegment(ctx, p.x, 0, GB_PIPE_W, Math.max(0, topH));
+    gbDrawPipeCap(ctx, p.x, Math.max(0, topH));
+
+    const bottomY = p.gapY + GB_PIPE_GAP;
+    gbDrawPipeCap(ctx, p.x, bottomY);
+    gbDrawPipeSegment(ctx, p.x, bottomY + GB_CAP_H, GB_PIPE_W, GB_GROUND_Y - (bottomY + GB_CAP_H));
+  }
+
+  function gbDrawGround(ctx) {
+    ctx.fillStyle = '#3fae5a';
+    ctx.fillRect(0, GB_GROUND_Y, GB_W, 6);
+    ctx.fillStyle = '#deb887';
+    ctx.fillRect(0, GB_GROUND_Y + 6, GB_W, GB_GROUND_H - 6);
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    const offset = gb ? (performance.now() / 16) % 24 : 0;
+    for (let gx = -offset; gx < GB_W; gx += 24) {
+      ctx.fillRect(gx, GB_GROUND_Y + 6, 12, 5);
+    }
+  }
+
+  function gbDrawClouds(ctx) {
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    gbClouds.forEach((c) => {
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.arc(c.x + c.r * 0.7, c.y + 4, c.r * 0.7, 0, Math.PI * 2);
+      ctx.arc(c.x - c.r * 0.7, c.y + 6, c.r * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function gbDraw() {
+    const ctx = gameCtx;
+    ctx.clearRect(0, 0, GB_W, GB_H);
+
+    const sky = ctx.createLinearGradient(0, 0, 0, GB_H);
+    sky.addColorStop(0, '#6fc9ee');
+    sky.addColorStop(1, '#bff0e0');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, GB_W, GB_H);
+
+    gbDrawClouds(ctx);
+
+    gb.pipes.forEach((p) => gbDrawPipe(ctx, p));
+
+    gbDrawGround(ctx);
+
+    ctx.font = '32px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.save();
+    ctx.translate(70, gb.birdY);
+    const angle = Math.max(-0.4, Math.min(0.9, gb.birdV / 12));
+    ctx.rotate(angle);
+    ctx.shadowColor = 'rgba(0,0,0,0.25)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = 3;
+    ctx.fillText('🐦', 0, 0);
+    ctx.restore();
+
+    if (gb.state === 'ready') {
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.font = '15px sans-serif';
+      ctx.fillText('Başlamak için dokun', GB_W / 2, GB_H / 2 + 60);
+    }
+  }
+
+  function gbLoop() {
+    gbUpdate();
+    gbDraw();
+    gbRAF = requestAnimationFrame(gbLoop);
+  }
+
+  function startGulsahBird() {
+    gbReset();
+    gbDraw();
+    if (gbRAF) cancelAnimationFrame(gbRAF);
+    gbLoop();
+  }
+
+  function stopGulsahBird() {
+    if (gbRAF) { cancelAnimationFrame(gbRAF); gbRAF = null; }
+  }
+
+  function gbPointerDown(e) {
+    e.preventDefault();
+    if (!gb) return;
+    if (gb.state === 'over') return;
+    gbFlap();
+  }
+  gameCanvas.addEventListener('pointerdown', gbPointerDown);
+
+  gameRestartBtn.addEventListener('click', () => {
+    gbReset();
+    gbDraw();
+  });
 
   closeBtn.addEventListener('click', () => overlay.classList.remove('show'));
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
